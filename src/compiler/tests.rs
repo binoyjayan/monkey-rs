@@ -47,6 +47,7 @@ pub fn test_constants(expected: &Vec<Object>, actual: &Vec<Object>) {
         );
         match exp {
             Object::Number(e) => test_numeric_object(got.clone(), e.clone()),
+            Object::Str(s) => test_string_object(&got.clone(), &s.clone()),
             _ => {}
         }
     }
@@ -62,6 +63,19 @@ fn test_numeric_object(actual: Object, exp: f64) {
         );
     } else {
         panic!("object is not numeric. got={}", actual);
+    }
+}
+
+#[cfg(test)]
+fn test_string_object(actual: &Object, expected: &str) {
+    if let Object::Str(result) = actual {
+        assert_eq!(
+            result, expected,
+            "object has wrong value. got={}, want={}",
+            result, expected
+        );
+    } else {
+        panic!("object is not Str. got={:?}", actual);
     }
 }
 
@@ -368,6 +382,35 @@ fn test_global_let_statements() {
                 definitions::make(Opcode::GetGlobal, &[0], 1),
                 definitions::make(Opcode::SetGlobal, &[1], 1),
                 definitions::make(Opcode::GetGlobal, &[1], 1),
+                definitions::make(Opcode::Pop, &[0], 1),
+            ],
+        },
+    ];
+
+    run_compiler_tests(&tests);
+}
+
+#[test]
+fn test_string_expressions() {
+    let tests = vec![
+        CompilerTestCase {
+            input: "\"monkey\"",
+            expected_constants: vec![Object::Str(String::from("monkey"))],
+            expected_instructions: vec![
+                definitions::make(Opcode::Constant, &[0], 1),
+                definitions::make(Opcode::Pop, &[0], 1),
+            ],
+        },
+        CompilerTestCase {
+            input: "\"mon\" + \"key\"",
+            expected_constants: vec![
+                Object::Str(String::from("mon")),
+                Object::Str(String::from("key")),
+            ],
+            expected_instructions: vec![
+                definitions::make(Opcode::Constant, &[0], 1),
+                definitions::make(Opcode::Constant, &[1], 1),
+                definitions::make(Opcode::Add, &[0], 1),
                 definitions::make(Opcode::Pop, &[0], 1),
             ],
         },

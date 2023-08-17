@@ -348,3 +348,22 @@ fn test_global_let_statements() {
 
     run_vm_tests(&tests);
 }
+
+#[test]
+fn test_string_expressions() {
+    let tests = vec![
+        VmTestCase {
+            input: "\"monkey\"",
+            expected: Object::Str("monkey".to_string()),
+        },
+        VmTestCase {
+            input: "\"mon\" + \"key\"",
+            expected: Object::Str("monkey".to_string()),
+        },
+        VmTestCase {
+            input: "\"mon\" + \"key\" + \"banana\"",
+            expected: Object::Str("monkeybanana".to_string()),
+        },
+    ];
+    run_vm_tests(&tests);
+}
